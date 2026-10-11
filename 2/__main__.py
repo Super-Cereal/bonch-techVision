@@ -9,9 +9,6 @@ from .filters import lowPassFilter, lowPassFilter_my, highPassFilter, highPassFi
 from .findCoords import findCoords
 
 filename = './assets/i4.png'
-binary_threshold_thresh = 50
-adaptive_threshold_block_size = 165
-adaptive_threshold_C = 6
 
 if __name__ == '__main__':
     base_dir = Path(__file__).resolve().parent
@@ -26,18 +23,21 @@ if __name__ == '__main__':
     image_hist = cv.calcHist([image], [0], None, [256], [0, 256])
 
     # Бинаризация
-    binary_threshold = manualThreshold(image, binary_threshold_thresh)
+    binary_threshold = manualThreshold(image, 50)
     binary_threshold_hist = cv.calcHist([binary_threshold], [0], None, [256], [0, 256])
 
     otsu_threshold_thresh, otsu_threshold = cv.threshold(image, 0, 255, type=cv.THRESH_BINARY + cv.THRESH_OTSU)
     otsu_threshold_hist = cv.calcHist([otsu_threshold], [0], None, [256], [0, 256])
 
+    A = 11
+    C = 3
+    # image = lowPassFilter(image, 5)
     adaptive_mean_threshold = cv.adaptiveThreshold(
-        image, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, adaptive_threshold_block_size, adaptive_threshold_C)
+        image, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, A, C)
     adaptive_mean_threshold_hist = cv.calcHist([adaptive_mean_threshold], [0], None, [256], [0, 256])
 
     adaptive_gaussian_threshold = cv.adaptiveThreshold(
-        image, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, adaptive_threshold_block_size, adaptive_threshold_C)
+        image, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, A, C)
     adaptive_gaussian_threshold_hist = cv.calcHist([adaptive_gaussian_threshold], [0], None, [256], [0, 256])
 
     fig, ax = plt.subplots(2, 5, figsize=(18, 10))
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     ax[0, 1].axis("off")
     ax[0, 1].set_title('Картинка ручная\nбинаризация')
     ax[1, 1].plot(binary_threshold_hist)
-    ax[1, 1].axvline(binary_threshold_thresh, color="red", label="Порог бинаризации")
+    ax[1, 1].axvline(50, color="red", label="Порог бинаризации")
     ax[1, 1].set_title('Гистограмма ручная\nбинаризация')
     ax[1, 1].legend()
 
